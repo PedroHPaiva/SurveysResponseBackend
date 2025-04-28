@@ -16,8 +16,9 @@ class App {
   }
 
   private middlewares(): void {
-    this.server.use(express.json());
     this.server.use(cors());
+    this.server.use(express.json());
+    this.server.options("*", cors());
 
     this.server.get("/liveness_check", (req: Request, res: Response): any => {
       res.status(200).json({
