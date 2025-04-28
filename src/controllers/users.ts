@@ -17,6 +17,7 @@ export class Users {
       const user = await usersRepository.createNewUser({ email, password: PasswordHash });
       return user;
     } catch (error) {
+      console.log(error);
       throw new Error(`Erro ao criar usuário de email ${email}`);
     }
   };

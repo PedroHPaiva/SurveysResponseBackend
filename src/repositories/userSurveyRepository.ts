@@ -9,24 +9,6 @@ interface evoltionParameters {
 }
 
 export class UserSurveyRepository {
-  // createItem = async (req: Request, res: Response) => {
-  //   try {
-  //     const response = await UserSurveyResponseTable.create(req.body);
-  //     res.status(201).json(response);
-  //   } catch (error: any) {
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // };
-
-  //   SELECT
-  //   origin,
-  //   TO_CHAR(created_at, 'YYYY-MM-DD HH24:00') as hour,
-  //   COUNT(*) as total,
-  //   SUM(CASE WHEN response_stat = 1 THEN 1 ELSE 0 END) as converted
-  // FROM your_table_name
-  // GROUP BY origin, hour
-  // ORDER BY hour ASC;
-
   getEvolutionTime = async () => {
     try {
       const [results] = await insideDatabase.query(
@@ -44,6 +26,7 @@ export class UserSurveyRepository {
 
       return results;
     } catch (error: any) {
+      console.log(error);
       throw new Error(`Erro ao receber os itens por evolução de itens`);
     }
   };
@@ -83,28 +66,4 @@ export class UserSurveyRepository {
       throw new Error(`Erro ao receber os itens`);
     }
   };
-
-  // updateItem = async (req: Request, res: Response) => {
-  //   try {
-  //     const [updated] = await UserSurveyResponseTable.update(req.body, {
-  //       where: { id: req.params.id },
-  //     });
-  //     if (!updated) return res.status(404).json({ error: "Response not found" });
-  //     res.json({ message: "Response updated" });
-  //   } catch (error: any) {
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // };
-
-  // deleteItem = async (req: Request, res: Response) => {
-  //   try {
-  //     const deleted = await UserSurveyResponseTable.destroy({
-  //       where: { id: req.params.id },
-  //     });
-  //     if (!deleted) return res.status(404).json({ error: "Response not found" });
-  //     res.json({ message: "Response deleted" });
-  //   } catch (error: any) {
-  //     res.status(500).json({ error: error.message });
-  //   }
-  // };
 }

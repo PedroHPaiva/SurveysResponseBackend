@@ -40,6 +40,7 @@ export class Sessions {
 
       return { email: user.email, created_at: user.created_at, token };
     } catch (error) {
+      console.log(error);
       throw new Error(`Erro ao criar a sessão para o usuário ${email}`);
     }
   };
