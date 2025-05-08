@@ -5,7 +5,7 @@ import { ensureAuthenticated } from "../middlewares/auth";
 import { Users } from "../controllers/users";
 
 const usersRouter = Router();
-usersRouter.use(ensureAuthenticated);
+// usersRouter.use(ensureAuthenticated);
 
 usersRouter.post("/", async (req: Request, res: Response): Promise<void> => {
   try {
@@ -16,8 +16,8 @@ usersRouter.post("/", async (req: Request, res: Response): Promise<void> => {
     const newUser = await users.createUser({ email, password });
 
     res.json(newUser);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Erro interno do servidor." });
   }
 });
 

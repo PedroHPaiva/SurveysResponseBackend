@@ -19,12 +19,10 @@ class App {
     this.server.use(cors());
     this.server.use(express.json());
 
-    this.server.get("/liveness_check", (req: Request, res: Response): any => {
+    this.server.get("/liveness_check", (req: Request, res: Response): void => {
       res.status(200).json({
         message: "API viva.",
       });
-
-      return;
     });
   }
 

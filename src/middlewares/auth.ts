@@ -20,7 +20,7 @@ export const ensureAuthenticated: RequestHandler = (req: Request, res: Response,
       return;
     }
 
-    (req as any).user = user;
+    req.user = user as string;
     next();
   });
 };

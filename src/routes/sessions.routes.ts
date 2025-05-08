@@ -13,8 +13,8 @@ sessionsRouter.post("/", async (req: Request, res: Response): Promise<void> => {
     const newSession = await sessions.createSession({ email, password });
 
     res.json(newSession);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Erro interno do servidor." });
   }
 });
 

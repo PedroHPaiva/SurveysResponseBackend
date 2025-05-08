@@ -18,8 +18,8 @@ surveysRouter.get("/", ensureAuthenticated, async (req: Request, res: Response):
     const evolution = await userSurveyResponse.getEvolutionTime({ startDate, endDate, groupBy });
 
     res.json(evolution);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Erro interno do servidor." });
   }
 });
 
@@ -28,8 +28,8 @@ surveysRouter.post("/", async (req: Request, res: Response): Promise<void> => {
     const userSurveyResponse = new UserSurveyResponse();
     const response = await userSurveyResponse.saveSurveysInCache();
     res.json(response);
-  } catch (err: any) {
-    res.status(500).json({ error: err.message });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "Erro interno do servidor." });
   }
 });
 

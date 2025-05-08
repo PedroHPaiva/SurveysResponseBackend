@@ -1,15 +1,9 @@
-import { Request, Response } from "express";
-import { insideDatabase } from "../database/inside";
-import { UserSurveyResponseTable } from "../models/UserSurveyResponse";
+import { insideDatabase } from "../../database/inside";
+import { SurveysFunctions } from "../surveysFunctions";
+import { Survey, GetevolutionParameters } from "../../types/Surveys";
 
-interface evoltionParameters {
-  startDate: string;
-  endDate: string;
-  format: string;
-}
-
-export class UserSurveyRepository {
-  getEvolutionTime = async () => {
+export class SurveysRepository implements SurveysFunctions {
+  getEvolutionTime = async (): Promise<Survey[]> => {
     try {
       const [results] = await insideDatabase.query(
         `
@@ -24,14 +18,13 @@ export class UserSurveyRepository {
         `
       );
 
-      return results;
-    } catch (error: any) {
-      console.log(error);
+      return results as Survey[];
+    } catch (err) {
       throw new Error(`Erro ao receber os itens por evolução de itens`);
     }
   };
 
-  getEvolutionTimePerPeriod = async ({ startDate, endDate, format }: evoltionParameters) => {
+  getEvolutionTimePerPeriod = async ({ startDate, endDate, format }: GetevolutionParameters): Promise<Survey[]> => {
     try {
       const [results] = await insideDatabase.query(
         `
@@ -50,20 +43,9 @@ export class UserSurveyRepository {
         }
       );
 
-      return results;
-    } catch (error: any) {
-      console.log(error);
+      return results as Survey[];
+    } catch (err) {
       throw new Error(`Erro ao receber os itens por evolução de itens`);
-    }
-  };
-
-  getItems = async () => {
-    try {
-      const responses = await UserSurveyResponseTable.findAll();
-      return responses;
-    } catch (error: any) {
-      console.log(error);
-      throw new Error(`Erro ao receber os itens`);
     }
   };
 }

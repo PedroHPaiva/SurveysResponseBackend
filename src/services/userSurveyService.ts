@@ -1,19 +1,13 @@
 import moment from "moment";
 
-interface SurveyItem {
-  origin: string;
-  period: string; // Ex: '2025-04-27 01:00'
-  total: number;
-  converted: number;
-  conversionRate: number;
-}
+import { SurveyFinalObject, Survey } from "../types/Surveys";
 
 export class UserSurveyService {
-  mergeWithoutDuplicates(arr1: SurveyItem[], arr2: SurveyItem[]): SurveyItem[] {
+  mergeWithoutDuplicates(arr1: SurveyFinalObject[], arr2: SurveyFinalObject[]): SurveyFinalObject[] {
     const merged = [...arr1, ...arr2];
 
     const seen = new Set<string>();
-    const unique: SurveyItem[] = [];
+    const unique: SurveyFinalObject[] = [];
 
     for (const item of merged) {
       const key = `${item.origin}_${item.period}`;
@@ -26,8 +20,8 @@ export class UserSurveyService {
     return unique;
   }
 
-  groupSurveyData(data: SurveyItem[], groupBy: string | undefined): SurveyItem[] {
-    const grouped: { [key: string]: { [origin: string]: SurveyItem } } = {};
+  groupSurveyData(data: SurveyFinalObject[], groupBy: string | undefined): SurveyFinalObject[] {
+    const grouped: { [key: string]: { [origin: string]: SurveyFinalObject } } = {};
 
     data.forEach((item) => {
       let newPeriod: string;
@@ -61,7 +55,7 @@ export class UserSurveyService {
     });
 
     // Depois recalcula a taxa de conversão
-    const result: SurveyItem[] = [];
+    const result: SurveyFinalObject[] = [];
 
     Object.values(grouped).forEach((origins) => {
       Object.values(origins).forEach((item) => {
@@ -73,8 +67,8 @@ export class UserSurveyService {
     return result;
   }
 
-  formatSurveysResults(results: any): SurveyItem[] {
-    return results.map((r: any) => ({
+  formatSurveysResults(results: Survey[]): SurveyFinalObject[] {
+    return results.map((r) => ({
       origin: r.origin,
       period: r.period,
       total: Number(r.total),
@@ -83,7 +77,7 @@ export class UserSurveyService {
     }));
   }
 
-  filterSurveyDataByDateRange(data: SurveyItem[], startDate: string | Date, endDate: string | Date): SurveyItem[] {
+  filterSurveyDataByDateRange(data: SurveyFinalObject[], startDate: string | Date, endDate: string | Date): SurveyFinalObject[] {
     const start = moment(startDate);
     const end = moment(endDate).add(1, "days");
 

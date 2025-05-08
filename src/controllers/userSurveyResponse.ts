@@ -1,31 +1,19 @@
-import { UserSurveyRepository } from "../repositories/userSurveyRepository";
+import { SurveysRepository } from "../repositories/production/surveys";
 import { UserSurveyService } from "../services/userSurveyService";
-import { addToArrayInRedis, getArrayFromRedis } from "../repositories/redisRepository";
 import { isEndDateBeforeToday, getTodayDate } from "../helpers/utils";
-
-interface EvolutionParameters {
-  startDate: string;
-  endDate: string;
-  groupBy?: string;
-}
-
-interface SurveyItem {
-  origin: string;
-  period: string;
-  total: number;
-  converted: number;
-  conversionRate: number;
-}
+import { SurveyFinalObject, GetevolutionParameters, Survey } from "../types/Surveys";
+import { RedisRepository } from "../repositories/production/redis";
 
 export class UserSurveyResponse {
-  getEvolutionTime = async ({ startDate, endDate, groupBy }: EvolutionParameters) => {
+  getEvolutionTime = async ({ startDate, endDate, groupBy }: GetevolutionParameters) => {
     try {
-      const userSurveyRepository = new UserSurveyRepository();
+      const userSurveyRepository = new SurveysRepository();
       const userSurveyService = new UserSurveyService();
+      const redisRepository = new RedisRepository();
 
-      const cacheData = await getArrayFromRedis("key_usersSurveysResponse");
+      const cacheData = await redisRepository.getArrayFromRedis("key_usersSurveysResponse");
 
-      if (cacheData.length === 0) {
+      if (!cacheData || cacheData.length === 0) {
         const groupByQueryFormat = groupBy === "month" ? "YYYY-MM" : groupBy === "day" ? "YYYY-MM-DD" : "YYYY-MM-DD HH24:00";
         const results = await userSurveyRepository.getEvolutionTimePerPeriod({ startDate, endDate, format: groupByQueryFormat });
         return userSurveyService.formatSurveysResults(results);
@@ -47,24 +35,26 @@ export class UserSurveyResponse {
         let results = await userSurveyRepository.getEvolutionTimePerPeriod({ startDate: todayDate, endDate: todayDate, format: "YYYY-MM-DD HH24:00" });
         results = userSurveyService.formatSurveysResults(results);
 
-        let agreggatedResults = userSurveyService.mergeWithoutDuplicates(cacheData, results as SurveyItem[]);
+        let agreggatedResults = userSurveyService.mergeWithoutDuplicates(cacheData, results as SurveyFinalObject[]);
 
         agreggatedResults = userSurveyService.filterSurveyDataByDateRange(agreggatedResults, startDate, endDate);
         agreggatedResults = userSurveyService.groupSurveyData(agreggatedResults, groupBy);
 
         return agreggatedResults;
       }
-    } catch (error) {
+    } catch (err) {
       throw new Error(`Erro ao receber os itens`);
     }
   };
 
   saveSurveysInCache = async () => {
     try {
-      const userSurveyRepository = new UserSurveyRepository();
+      const userSurveyRepository = new SurveysRepository();
+      const redisRepository = new RedisRepository();
+
       const results = await userSurveyRepository.getEvolutionTime();
 
-      const formatted = results.map((r: any) => ({
+      const formatted = results.map((r: Survey) => ({
         origin: r.origin,
         period: r.period,
         total: Number(r.total),
@@ -72,10 +62,10 @@ export class UserSurveyResponse {
         conversionRate: r.total > 0 ? parseFloat(((r.converted / r.total) * 100).toFixed(1)) : 0,
       }));
 
-      await addToArrayInRedis("key_usersSurveysResponse", formatted);
+      await redisRepository.addToArrayInRedis("key_usersSurveysResponse", formatted);
 
       return "Dados inseridos com sucesso no redis";
-    } catch (error) {
+    } catch (err) {
       throw new Error(`Erro ao inserir os itens no redis`);
     }
   };
